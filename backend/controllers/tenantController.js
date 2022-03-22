@@ -1,7 +1,10 @@
 const asyncHandler = require('express-async-handler')
+const tenant = require('../models/tenantModel')
 
 const dashboard = asyncHandler(async (req, res) => {
-    res.status(200).json({message:'Tenant Dashboard Info'})
+    const address = await tenant.find()
+
+    res.status(200).json(address)
 })
 
 const addResidency = asyncHandler(async (req, res) => {
