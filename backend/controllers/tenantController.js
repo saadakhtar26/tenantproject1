@@ -1,9 +1,13 @@
 const asyncHandler = require('express-async-handler')
-const tenant = require('../models/tenantModel')
+const tenantModel = require('../models/tenantModel')
 
 const dashboard = asyncHandler(async (req, res) => {
-    const address = await tenant.find()
-    res.status(200).json(address)
+    if(!req.body.tenant_ID){
+        res.status(400)
+        throw new Error('Please specify Tenant ID')
+    }
+    const tenant = await tenantModel.findOne( { '_Id' : req.body.tenant_ID } )
+    res.status(200).json(tenant)
 })
 
 const addResidency = asyncHandler(async (req, res) => {
@@ -11,14 +15,14 @@ const addResidency = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Please add an address')
     }
-    const address = await tenant.create({
+    const address = await tenantModel.create({
         text: req.body.address
     })
     res.status(200).json(address)
 })
 
 const delResidency = asyncHandler(async (req, res) => {
-    const address = await tenant.findById(req.params.id)
+    const address = await tenantModel.findById(req.params.id)
     if(!req.params.id){
         res.status(400)
         throw new Error('Please add an ID')
