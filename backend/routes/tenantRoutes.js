@@ -1,11 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const {
-    dashboard, addResidency, delResidency
+    dashboard, delResidence, addResidence
 } = require('../controllers/tenantController')
 
 router.route('/dashboard').get(dashboard)
-router.route('/residency').post(addResidency)
-router.route('/residency/:id').delete(delResidency)
+router.route('/residence').post(addResidence)
+router.route('/residence/:id').delete(delResidence)
 
 module.exports = router
