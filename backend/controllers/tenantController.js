@@ -1,14 +1,17 @@
+const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
-const residenceModel = require('../models/tenantModel')
+const residenceModel = require('../models/residenceModel')
+const tenantModel = require('../models/tenantModel')
 
 const dashboard = asyncHandler(async (req, res) => {
-    /*if(!req.body.residence_ID){
+    if(!req.body.tenant_ID){
         res.status(400)
-        throw new Error('Please specify Residence ID')
+        throw new Error('Please specify Tenant ID')
     }
-    const residence = await residenceModel.findOne( { '_id' : ObjectId(req.body.residence_ID) } )*/
-    const residence = await residenceModel.find()
-    res.status(200).json(residence)
+    const tenant = await tenantModel.findById(req.body.tenant_ID)
+    const residence = await residenceModel.findOne( { 'tenant_ID' : req.body.tenant_ID } )
+    const result = {"tenant": tenant, "residence" : residence}
+    res.status(200).json(result)
 })
 
 const addResidence = asyncHandler(async (req, res) => {
@@ -16,16 +19,10 @@ const addResidence = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Residence Info Empty')
     }
-    const residence = await residenceModel.create({
-        own_name: req.body.own_name,
-        own_cnic: req.body.own_cnic,
-        own_father: req.body.own_father,
-        own_phone: req.body.own_phone,
-        address: req.body.address,
-        station_ID: req.body.station_ID,
-        tenant_ID: req.body.tenant_ID
-    })
-    res.status(200).json(address)
+    const residence = await residenceModel.create(
+        req.body.residence
+    )
+    res.status(200).json(residence)
 })
 
 const delResidence = asyncHandler(async (req, res) => {
