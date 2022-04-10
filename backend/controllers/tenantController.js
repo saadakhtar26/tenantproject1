@@ -26,13 +26,12 @@ const addResidence = asyncHandler(async (req, res) => {
 })
 
 const delResidence = asyncHandler(async (req, res) => {
-    const residence = await residenceModel.findById(req.params.id)
-    if(!req.params.id){
+    if(!req.body.id){
         res.status(400)
         throw new Error('Please add an ID')
     }
-    await residence.remove()
-    res.status(200).json({id: req.params.id})
+    await residenceModel.findByIdAndUpdate( req.body.id, {isActive: false, exitAt: Date.now} )
+    res.status(200).json({id: req.body.id})
 })
 
 module.exports = {
