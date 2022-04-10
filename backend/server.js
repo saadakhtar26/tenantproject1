@@ -11,6 +11,7 @@ app.use(express.urlencoded({ extended:false }))
 
 app.use('/tenant', require('./routes/tenantRoutes'))
 app.use('/hotel', require('./routes/hotelRoutes'))
+app.use('/police', require('./routes/policeRoutes'))
 
 app.use(errorHandler)
 
