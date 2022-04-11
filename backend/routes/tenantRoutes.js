@@ -6,6 +6,6 @@ const {
 
 router.route('/dashboard').get(dashboard)
 router.route('/residence').post(addResidence)
-router.route('/residence/:id').delete(delResidence)
+router.route('/residence').delete(delResidence)
 
 module.exports = router

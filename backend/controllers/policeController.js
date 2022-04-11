@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
-const tenantModel = require('../models/tenantModel')
 const residenceModel = require('../models/residenceModel')
 const roomModel = require('../models/roomModel')
 const hotelModel = require('../models/hotelModel')
@@ -43,7 +42,7 @@ const verifyTenant = asyncHandler(async (req, res) => {
         throw new Error('Please specify Station and Residency ID')
     }
     await residenceModel.findByIdAndUpdate( req.body.residence_ID, { isVerified: true } )
-    res.status(200).json({id: req.body.residence_ID})
+    res.status(200).json({"message" : "Tenant Successfully Verified"})
 })
 
 const tenantList = asyncHandler(async (req, res) => {

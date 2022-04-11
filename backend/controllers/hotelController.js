@@ -42,7 +42,7 @@ const addGuest = asyncHandler(async (req, res) => {
     const guest = await roomModel.create(
         req.body.guest
     )
-    res.status(200).json(guest)
+    res.status(200).json({"message" : "Guest Successfully Added"})
 })
 
 const delGuest = asyncHandler(async (req, res) => {
@@ -51,7 +51,7 @@ const delGuest = asyncHandler(async (req, res) => {
         throw new Error('Please specify Guest ID')
     }
     await roomModel.findByIdAndUpdate( req.body.guest_ID, {isActive: false, exitAt: Date.now() } )
-    res.status(200).json({id: req.body.guest_ID})
+    res.status(200).json({"message" : "Guest Successfully Removed"})
 })
 
 module.exports = {
