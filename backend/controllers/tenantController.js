@@ -39,11 +39,7 @@ const register = asyncHandler(async (req, res) => {
     if(tenant){
         res.status(201).json({
             _id: tenant.id,
-            name: tenant.name,
-            email: tenant.email,
-            father: tenant.father,
-            phone: tenant.phone,
-            cnic: tenant.cnic
+            token: generateToken(tenant._id)
         })
     }
     else{
@@ -63,7 +59,8 @@ const login = asyncHandler(async (req, res) => {
             email: tenant.email,
             father: tenant.father,
             phone: tenant.phone,
-            cnic: tenant.cnic
+            cnic: tenant.cnic,
+            token: generateToken(tenant._id)
         })
     }
     else{
@@ -72,15 +69,24 @@ const login = asyncHandler(async (req, res) => {
     }
 })
 
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '1h'
+    })
+}
+
 const dashboard = asyncHandler(async (req, res) => {
-    if(!req.body.tenant_ID){
-        res.status(400)
-        throw new Error('Please specify Tenant ID')
+    const tenant = await tenantModel.findById(req.user.id).select('-password')
+    const residence = await residenceModel.findOne( { 'tenant_ID' : req.user.id, 'isActive' : true }, 'isVerified address station_ID entryAt' ) || null
+    
+    let result
+    if(residence!=null){
+        const station = await stationModel.findOne( {'_id' : residence.station_ID}, 'station_name address' )
+        result = {"tenant": tenant, "residence" : residence, "station_name" : station}
+    }else{
+        result = {"tenant": tenant, "residence" : null, "station_name" : null}
     }
-    const tenant = await tenantModel.findById(req.body.tenant_ID)
-    const residence = await residenceModel.findOne( { 'tenant_ID' : req.body.tenant_ID, 'isActive' : true }, 'isVerified address station_ID entryAt' )
-    const station = await stationModel.findOne( {'_id' : residence.station_ID}, 'station_name address' )
-    const result = {"tenant": tenant, "residence" : residence, "station_name" : station}
+    
     res.status(200).json(result)
 })
 

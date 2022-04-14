@@ -5,8 +5,7 @@ const tenantSchema = mongoose.Schema({
     father: String,
     name: String,
     password: String,
-    phone: String,
-    residence_ID: mongoose.ObjectId
+    phone: String
 })
 
 module.exports = mongoose.model('tenant_test', tenantSchema)

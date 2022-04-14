@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const stationSchema = mongoose.Schema({
     email: String,
-    pass: String,
+    password: String,
     station_name: String,
     sho_cnic: String,
     sho_name: String,

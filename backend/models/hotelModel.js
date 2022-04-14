@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const hotelSchema = mongoose.Schema({
     email: String,
-    pass: String,
+    password: String,
     hotel_name: String,
     own_cnic: String,
     own_father: String,

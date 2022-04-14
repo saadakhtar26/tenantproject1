@@ -2,35 +2,93 @@ const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
 const roomModel = require('../models/roomModel')
 const hotelModel = require('../models/hotelModel')
+const stationModel = require('../models/stationModel')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+
+const register = asyncHandler(async (req, res) => {
+    const { email, password, hotel_name, own_cnic, own_father, own_name, phone, address, totalRooms, station_ID } = req.body
+
+    //Checking if all fields exist in request
+    if(!email  || !password  || !hotel_name  || !own_cnic  || !own_father  || !own_name  || !phone  || !address  || !totalRooms  || !station_ID){
+        res.status(400)
+        throw new Error('Please check all fields')
+    }
+
+    //Checking if User already exists
+    const userExists = await hotelModel.findOne({email})
+    if(userExists){
+        res.status(400)
+        throw new Error('User already Registered')
+    }
+
+    //Creating Account in Database
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+    const hotel = await hotelModel.create({
+        password: hashedPassword,
+        email, 
+        hotel_name, 
+        own_cnic, 
+        own_father, 
+        own_name, 
+        phone, 
+        address, 
+        totalRooms, 
+        station_ID
+    })
+
+    //Conditional Response
+    if(hotel){
+        res.status(201).json({
+            _id: hotel.id,
+            token: generateToken(hotel._id)
+        })
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid User Data')
+    }
+})
+
+const login = asyncHandler(async (req, res) => {
+    const {email, password} = req.body
+    const hotel = await hotelModel.findOne({email})
+
+    if(hotel && (await bcrypt.compare(password, hotel.password))){
+        res.status(201).json({
+            _id: hotel.id,
+            token: generateToken(hotel._id)
+        })
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid Credentials')
+    }
+})
+
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: '1h'
+    })
+}
 
 const dashboard = asyncHandler(async (req, res) => {
-    if(!req.body.hotel_ID){
-        res.status(400)
-        throw new Error('Please specify Hotel ID')
-    }
-    const hotel = await hotelModel.findById(req.body.hotel_ID, 'hotel_name email phone isVerified totalRooms address station_ID')
-    const owner = await hotelModel.findById(req.body.hotel_ID, 'own_name own_cnic own_father')
-    //const station = await policeModel.findById( { '_id' : hotel.station_ID } )
-    const guestCount = await roomModel.countDocuments( {isActive: true, hotel_ID: req.body.hotel_ID} )
-    const result = {"hotel": hotel, "owner" : owner, "guest_count" : guestCount}
+    const hotel = await hotelModel.findById(req.user.id, 'hotel_name email phone isVerified totalRooms address station_ID')
+    const owner = await hotelModel.findById(req.user.id, 'own_name own_cnic own_father')
+    const station = await stationModel.findById(hotel.station_ID, 'station_name sho_name address phone')
+    const guestCount = await roomModel.countDocuments( {isActive: true, hotel_ID: req.user.id} )
+    const result = {"hotel": hotel, "owner" : owner, "station": station, "guest_count" : guestCount}
     res.status(200).json(result)
 })
 
 const guestList = asyncHandler(async (req, res) => {
-    if(!req.body.hotel_ID){
-        res.status(400)
-        throw new Error('Please specify Hotel ID')
-    }
-    const guestList = await roomModel.find( { 'hotel_ID' : req.body.hotel_ID, 'isActive' : true } )
+    const guestList = await roomModel.find( { 'hotel_ID' : req.user.id, 'isActive' : true } )
     res.status(200).json(guestList)
 })
 
 const guestHistory = asyncHandler(async (req, res) => {
-    if(!req.body.hotel_ID){
-        res.status(400)
-        throw new Error('Please specify Hotel ID')
-    }
-    const guestHistory = await roomModel.find( { 'hotel_ID' : req.body.hotel_ID, 'isActive' : false } )
+    const guestHistory = await roomModel.find( { 'hotel_ID' : req.user.id, 'isActive' : false } )
     res.status(200).json(guestHistory)
 })
 
@@ -55,6 +113,8 @@ const delGuest = asyncHandler(async (req, res) => {
 })
 
 module.exports = {
+    register,
+    login,
     dashboard,
     addGuest,
     delGuest,
