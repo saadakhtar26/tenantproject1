@@ -1,8 +1,76 @@
 const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+
 const residenceModel = require('../models/residenceModel')
 const tenantModel = require('../models/tenantModel')
 const stationModel = require('../models/stationModel')
+
+const register = asyncHandler(async (req, res) => {
+    const {email, password, name, father, phone, cnic} = req.body
+
+    //Checking if all fields exist in request
+    if(!email || !password || !name || !father || !phone || !cnic){
+        res.status(400)
+        throw new Error('Please check all fields')
+    }
+
+    //Checking if User already exists
+    const userExists = await tenantModel.findOne({email})
+    if(userExists){
+        res.status(400)
+        throw new Error('User alreadu Registered')
+    }
+
+    //Creating Account in Database
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+    const tenant = await tenantModel.create({
+        email, 
+        password: hashedPassword, 
+        name, 
+        father, 
+        phone, 
+        cnic
+    })
+
+    //Conditional Response
+    if(tenant){
+        res.status(201).json({
+            _id: tenant.id,
+            name: tenant.name,
+            email: tenant.email,
+            father: tenant.father,
+            phone: tenant.phone,
+            cnic: tenant.cnic
+        })
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid User Data')
+    }
+})
+
+const login = asyncHandler(async (req, res) => {
+    const {email, password} = req.body
+    const tenant = await tenantModel.findOne({email})
+
+    if(tenant && (await bcrypt.compare(password, tenant.password))){
+        res.status(201).json({
+            _id: tenant.id,
+            name: tenant.name,
+            email: tenant.email,
+            father: tenant.father,
+            phone: tenant.phone,
+            cnic: tenant.cnic
+        })
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid Credentials')
+    }
+})
 
 const dashboard = asyncHandler(async (req, res) => {
     if(!req.body.tenant_ID){
@@ -38,5 +106,7 @@ const delResidence = asyncHandler(async (req, res) => {
 module.exports = {
     dashboard,
     addResidence,
-    delResidence
+    delResidence,
+    register,
+    login
 }

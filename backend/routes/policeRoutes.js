@@ -1,9 +1,11 @@
 const express = require('express')
 const router = express.Router()
 const {
-    dashboard, newTenants, verifyTenant, tenantList, tenantHistory, newHotels, hotelsList, hotelGuestsList, hotelGuestsHistory
+    /*register, login,*/ dashboard, newTenants, verifyTenant, tenantList, tenantHistory, newHotels, hotelsList, hotelGuestsList, hotelGuestsHistory
 } = require('../controllers/policeController')
 
+//router.route('/register').post(register)
+//router.route('/login').post(login)
 router.route('/dashboard').get(dashboard)
 router.route('/newTenants').get(newTenants)
 router.route('/verifyTenant').post(verifyTenant)

@@ -4,7 +4,7 @@ const tenantSchema = mongoose.Schema({
     email: String,
     father: String,
     name: String,
-    pass: String,
+    password: String,
     phone: String,
     residence_ID: mongoose.ObjectId
 })

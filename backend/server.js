@@ -9,9 +9,9 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended:false }))
 
-app.use('/tenant', require('./routes/tenantRoutes'))
-app.use('/hotel', require('./routes/hotelRoutes'))
-app.use('/police', require('./routes/policeRoutes'))
+app.use('/api/tenant', require('./routes/tenantRoutes'))
+app.use('/api/hotel', require('./routes/hotelRoutes'))
+app.use('/api/police', require('./routes/policeRoutes'))
 
 app.use(errorHandler)
 
