@@ -9,13 +9,13 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended:false }))
 
-app.options('/api/tenant/login', function (req, res) {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
     res.setHeader('Access-Control-Allow-Methods', '*');
     res.setHeader("Access-Control-Allow-Headers", "*");
-    res.end();
+    next();
 });
-
+ 
 app.use('/api/tenant', require('./routes/tenantRoutes'))
 app.use('/api/hotel', require('./routes/hotelRoutes'))
 app.use('/api/police', require('./routes/policeRoutes'))
