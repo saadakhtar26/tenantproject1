@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {
-    register, login, dashboard, delResidence, addResidence
+    register, login, dashboard, delResidence, addResidence, changePass
 } = require('../controllers/tenantController')
 const {protect} = require('../middleware/authMiddleware')
 
@@ -10,5 +10,6 @@ router.route('/login').post(login)
 router.get('/dashboard', protect, dashboard)
 router.post('/residence', protect, addResidence)
 router.delete('/residence', protect, delResidence)
+router.post('/changepass', protect, changePass)
 
 module.exports = router

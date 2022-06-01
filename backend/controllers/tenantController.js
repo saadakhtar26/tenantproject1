@@ -73,13 +73,14 @@ const generateToken = (id) => {
 const dashboard = asyncHandler(async (req, res) => {
     const tenant = await tenantModel.findById(req.user.id).select('-password')
     const residence = await residenceModel.findOne( { 'tenant_ID' : req.user.id, 'isActive' : true }, 'isVerified address station_ID entryAt' ) || null
+    const stations = await stationModel.find({},'_id station_name')
     
     let result
     if(residence!=null){
         const station = await stationModel.findOne( {'_id' : residence.station_ID}, 'station_name address' )
         result = {"tenant": tenant, "residence" : residence, "station_name" : station}
     }else{
-        result = {"tenant": tenant, "residence" : null, "station_name" : null}
+        result = {"tenant": tenant, "residence" : null, "stations" : stations}
     }
     
     res.status(200).json(result)
@@ -112,10 +113,30 @@ const delResidence = asyncHandler(async (req, res) => {
     res.status(200).json({"message" : "Residence Removed Successfully"})
 })
 
+const changePass = asyncHandler(async (req, res) => {
+    if(!req.body.oldPass || !req.body.newPass){
+        res.status(400)
+        throw new Error('Please add Old and New Passwords')
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
+    
+    const tenant = await tenantModel.findById( req.user.id, '_id password' )
+    if(hashedPass != tenant.password){
+        res.status(400)
+        throw new Error('Old Password Incorrect')
+    }
+
+    await tenantModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
+    res.status(200).json({"message" : "Password Changed Successfully"})
+})
+
 module.exports = {
     dashboard,
     addResidence,
     delResidence,
     register,
-    login
+    login,
+    changePass
 }

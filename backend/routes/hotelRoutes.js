@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {
-    register, login, dashboard, addGuest, delGuest, guestList, guestHistory
+    register, login, dashboard, addGuest, delGuest, guestList, guestHistory, changePass
 } = require('../controllers/hotelController')
 const {protect} = require('../middleware/authMiddleware')
 
@@ -12,5 +12,6 @@ router.get('/guests', protect, guestList)
 router.get('/history', protect, guestHistory)
 router.post('/guest', protect, addGuest)
 router.delete('/guest', protect, delGuest)
+router.post('/changepass', protect, changePass)
 
 module.exports = router

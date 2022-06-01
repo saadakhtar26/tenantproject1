@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const {
-    login, dashboard, newTenants, verifyTenant, tenantList, tenantHistory, newHotels, hotelsList, hotelGuestsList, hotelGuestsHistory
+    login, dashboard, newTenants, verifyTenant, tenantList, tenantHistory, newHotels, hotelsList, hotelGuestsList, hotelGuestsHistory, changePass
 } = require('../controllers/policeController')
 const {protect} = require('../middleware/authMiddleware')
 
@@ -15,5 +15,6 @@ router.get('/hotels/new', protect, newHotels)
 router.get('/hotels', protect, hotelsList)
 router.get('/hotels/guests', protect, hotelGuestsList)
 router.get('/hotels/history', protect, hotelGuestsHistory)
+router.post('/changepass', protect, changePass)
 
 module.exports = router

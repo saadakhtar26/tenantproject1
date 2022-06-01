@@ -112,6 +112,25 @@ const hotelGuestsHistory = asyncHandler(async (req, res) => {
     res.status(200).json(hotelGuestsHistory)
 })
 
+const changePass = asyncHandler(async (req, res) => {
+    if(!req.body.oldPass || !req.body.newPass){
+        res.status(400)
+        throw new Error('Please add Old and New Passwords')
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
+    
+    const station = await stationModel.findById( req.user.id, '_id password' )
+    if(hashedPass != station.password){
+        res.status(400)
+        throw new Error('Old Password Incorrect')
+    }
+
+    await stationModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
+    res.status(200).json({"message" : "Password Changed Successfully"})
+})
+
 module.exports = {
     login,
     dashboard,
@@ -122,5 +141,6 @@ module.exports = {
     newHotels,
     hotelsList,
     hotelGuestsList,
-    hotelGuestsHistory
+    hotelGuestsHistory,
+    changePass
 }
