@@ -55,11 +55,6 @@ const login = asyncHandler(async (req, res) => {
     if(tenant && (await bcrypt.compare(password, tenant.password))){
         res.status(201).json({
             _id: tenant.id,
-            name: tenant.name,
-            email: tenant.email,
-            father: tenant.father,
-            phone: tenant.phone,
-            cnic: tenant.cnic,
             token: generateToken(tenant._id)
         })
     }
@@ -95,9 +90,17 @@ const addResidence = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Residence Info Empty')
     }
-    await residenceModel.create(req.body.residence)
-    const result = {"message" : "Residence Successfully Added"}
-    res.status(200).json(result)
+    const residence = await residenceModel.create(req.body.residence)
+
+    if(residence){
+        res.status(200).json({
+            "residence_ID" : residence.id
+        })
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid Residence Data')
+    }
 })
 
 const delResidence = asyncHandler(async (req, res) => {

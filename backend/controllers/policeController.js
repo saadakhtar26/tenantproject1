@@ -56,8 +56,14 @@ const verifyTenant = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Please specify Residence ID')
     }
-    await residenceModel.findByIdAndUpdate( req.body.residence_ID, { isVerified: true } )
-    res.status(200).json({"message" : "Tenant Successfully Verified"})
+    const verifiedTenant = await residenceModel.findByIdAndUpdate( req.body.residence_ID, { isVerified: true } )
+    if(verifiedTenant){
+        res.status(200).json({"tenant_ID" : verifiedTenant.id})
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid Data')
+    }
 })
 
 const tenantList = asyncHandler(async (req, res) => {

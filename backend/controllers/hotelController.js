@@ -97,10 +97,14 @@ const addGuest = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Guest Data Empty')
     }
-    const guest = await roomModel.create(
-        req.body.guest
-    )
-    res.status(200).json({"message" : "Guest Successfully Added"})
+    const guest = await roomModel.create(req.body.guest)
+    if(guest){
+        res.status(200).json({"guest_ID" : guest.id})
+    }
+    else{
+        res.status(400)
+        throw new Error('Invalid Data')
+    }
 })
 
 const delGuest = asyncHandler(async (req, res) => {
