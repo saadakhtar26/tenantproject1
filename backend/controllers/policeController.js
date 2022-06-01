@@ -122,7 +122,7 @@ const changePass = asyncHandler(async (req, res) => {
     const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
     
     const station = await stationModel.findById( req.user.id, '_id password' )
-    if(hashedPass != station.password){
+    if(!bcrypt.compareSync(req.body.oldPass, station.password)){
         res.status(400)
         throw new Error('Old Password Incorrect')
     }

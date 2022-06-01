@@ -121,9 +121,10 @@ const changePass = asyncHandler(async (req, res) => {
 
     const salt = await bcrypt.genSalt(10)
     const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
-    
+
     const tenant = await tenantModel.findById( req.user.id, '_id password' )
-    if(hashedPass != tenant.password){
+
+    if(!bcrypt.compareSync(req.body.oldPass, tenant.password)){
         res.status(400)
         throw new Error('Old Password Incorrect')
     }
