@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const residenceModel = require('../models/residenceModel')
+const tenantModel = require('../models/tenantModel')
 const roomModel = require('../models/roomModel')
 const hotelModel = require('../models/hotelModel')
 const stationModel = require('../models/stationModel')
@@ -46,9 +47,14 @@ const dashboard = asyncHandler(async (req, res) => {
 })
 
 const newTenants = asyncHandler(async (req, res) => {
-    const residencyList = await residenceModel.find( { 'station_ID' : req.user.id, 'isVerified' : false } )
-    
-    res.status(200).json(residencyList)
+    residenceModel.find(
+        { 'station_ID' : req.user.id, 'isVerified' : false }, 
+        'own_name own_cnic own_father own_phone address entryAt'
+    )
+    .populate('tenant', '-_id cnic email father name phone')
+    .exec(function(err, list){
+        res.status(200).json(list)
+    })
 })
 
 const verifyTenant = asyncHandler(async (req, res) => {
@@ -58,7 +64,7 @@ const verifyTenant = asyncHandler(async (req, res) => {
     }
     const verifiedTenant = await residenceModel.findByIdAndUpdate( req.body.residence_ID, { isVerified: true } )
     if(verifiedTenant){
-        res.status(200).json({"tenant_ID" : verifiedTenant.id})
+        res.status(200).json({"tenant" : verifiedTenant.id})
     }
     else{
         res.status(400)
@@ -67,15 +73,25 @@ const verifyTenant = asyncHandler(async (req, res) => {
 })
 
 const tenantList = asyncHandler(async (req, res) => {
-    const residencyList = await residenceModel.find( { 'station_ID' : req.user.id, 'isVerified' : true, 'isActive' : true } )
-    
-    res.status(200).json(residencyList)
+    residenceModel.find(
+        { 'station_ID' : req.user.id, 'isVerified' : true, 'isActive' : true }, 
+        'own_name own_cnic own_father own_phone address entryAt'
+    )
+    .populate('tenant', '-_id cnic email father name phone')
+    .exec(function(err, list){
+        res.status(200).json(list)
+    })
 })
 
 const tenantHistory = asyncHandler(async (req, res) => {
-    const residencyList = await residenceModel.find( { 'station_ID' : req.user.id, 'isVerified' : true, 'isActive' : false } )
-    
-    res.status(200).json(residencyList)
+    residenceModel.find(
+        { 'station_ID' : req.user.id, 'isVerified' : true, 'isActive' : false }, 
+        'own_name own_cnic own_father own_phone address entryAt'
+    )
+    .populate('tenant', '-_id cnic email father name phone')
+    .exec(function(err, list){
+        res.status(200).json(list)
+    })
 })
 
 const newHotels = asyncHandler(async (req, res) => {
