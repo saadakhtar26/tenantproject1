@@ -47,11 +47,15 @@ const dashboard = asyncHandler(async (req, res) => {
 })
 
 const newTenants = asyncHandler(async (req, res) => {
+    //find all residences in that police station area
     residenceModel.find(
         { 'station_ID' : req.user.id, 'isVerified' : false }, 
         'own_name own_cnic own_father own_phone address entryAt'
     )
+    //match those residencies with their associated tenants
     .populate('tenant', '-_id cnic email father name phone')
+    //return single response object
+    //replaces tenant's ID with its corresponding object
     .exec(function(err, list){
         res.status(200).json(list)
     })
