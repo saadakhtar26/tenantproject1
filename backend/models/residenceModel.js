@@ -7,7 +7,7 @@ const residenceSchema = mongoose.Schema({
     own_father: String,
     own_phone: String,
     address: String,
-    station_ID: [{ type: mongoose.ObjectId, ref: 'station_test' }],
+    station: [{ type: mongoose.ObjectId, ref: 'station_test' }],
     tenant: [{ type: mongoose.ObjectId, ref: 'tenant_test' }],
     entryAt: { type: Date, default: Date.now() },
     exitAt: Date

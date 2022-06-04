@@ -5,7 +5,7 @@ const roomSchema = mongoose.Schema({
     entryAt: { type: Date, default: Date.now() },
     exitAt: { type: Date },
     phone: Number,
-    hotel_ID: mongoose.ObjectId,
+    hotel_ID: [{ type: mongoose.ObjectId, ref: 'hotel_test' }],
     name: String,
     cnic: String
 })

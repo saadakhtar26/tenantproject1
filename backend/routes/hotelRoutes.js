@@ -1,12 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const {
-    register, login, dashboard, addGuest, delGuest, guestList, guestHistory, changePass
+    register, login, dashboard, addGuest, delGuest, guestList, guestHistory, changePass, stationsList
 } = require('../controllers/hotelController')
 const {protect} = require('../middleware/authMiddleware')
 
 router.route('/register').post(register)
 router.route('/login').post(login)
+router.route('/stations').get(stationsList)
 router.get('/dashboard', protect, dashboard)
 router.get('/guests', protect, guestList)
 router.get('/history', protect, guestHistory)

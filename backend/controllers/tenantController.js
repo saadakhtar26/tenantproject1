@@ -12,15 +12,13 @@ const register = asyncHandler(async (req, res) => {
 
     //Checking if all fields exist in request
     if(!email || !password || !name || !father || !phone || !cnic){
-        res.status(400)
-        throw new Error('Please check all fields')
+        res.status(400).json({ "status":"fail", "message":"Please check all fields" })
     }
 
     //Checking if User already exists
     const userExists = await tenantModel.findOne({email})
     if(userExists){
-        res.status(400)
-        throw new Error('User alreadu Registered')
+        res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
 
     //Creating Account in Database
@@ -37,30 +35,22 @@ const register = asyncHandler(async (req, res) => {
 
     //Conditional Response
     if(tenant){
-        res.status(201).json({
-            _id: tenant.id,
-            token: generateToken(tenant._id)
-        })
+        res.status(201).json({ "status":"success", token: generateToken(tenant._id) })
     }
     else{
-        res.status(400)
-        throw new Error('Invalid User Data')
+        res.status(400).json({ "status":"fail", "message":"Invalid User Data" })
     }
 })
 
 const login = asyncHandler(async (req, res) => {
-    const {email, password} = req.body
-    const tenant = await tenantModel.findOne({email})
+    const { email, password } = req.body
+    const tenant = await tenantModel.findOne({email},'_id password')
 
     if(tenant && (await bcrypt.compare(password, tenant.password))){
-        res.status(201).json({
-            _id: tenant.id,
-            token: generateToken(tenant._id)
-        })
+        res.status(201).json({ "status":"success", token: generateToken(tenant._id) })
     }
     else{
-        res.status(400)
-        throw new Error('Invalid Credentials')
+        res.status(400).json({ "status":"fail", "message":"Invalid Credentials" })
     }
 })
 
@@ -71,52 +61,49 @@ const generateToken = (id) => {
 }
 
 const dashboard = asyncHandler(async (req, res) => {
-    const tenant = await tenantModel.findById(req.user.id).select('-password')
-    const residence = await residenceModel.findOne( { 'tenant' : req.user.id, 'isActive' : true }, 'isVerified address station_ID entryAt' ) || null
-    const stations = await stationModel.find({},'_id station_name')
-    
-    let result
-    if(residence!=null){
-        const station = await stationModel.findOne( {'_id' : residence.station_ID}, 'station_name address' )
-        result = {"tenant": tenant, "residence" : residence, "station_name" : station}
-    }else{
-        result = {"tenant": tenant, "residence" : null, "stations" : stations}
-    }
-    
-    res.status(200).json(result)
+
+    residenceModel.find({ 'tenant' : req.user.id, 'isActive' : true })
+    .populate('tenant', '-_id -__v -password')
+    .populate('station', '-_id station_name')
+    .exec(async function(err, list){
+        if(list.length==0){
+            const tenant = await tenantModel.findById(req.user.id,'-_id -__v -password')
+            const stations = await stationModel.find({},'_id station_name')
+            res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
+        }
+        else{
+            res.status(200).json(list)
+        }
+    })
 })
 
 const addResidence = asyncHandler(async (req, res) => {
     if(!req.body.residence){
-        res.status(400)
-        throw new Error('Residence Info Empty')
+        res.status(400).json({ "status":"fail", "message":"Residence Info Empty" })
     }
     const residence = await residenceModel.create(req.body.residence)
-
     if(residence){
         res.status(200).json({
+            "status" : "success",
             "residence_ID" : residence.id
         })
     }
     else{
-        res.status(400)
-        throw new Error('Invalid Residence Data')
+        res.status(400).json({ "status":"fail", "message":"Invalid Residence Data" })
     }
 })
 
 const delResidence = asyncHandler(async (req, res) => {
     if(!req.body.residence_ID){
-        res.status(400)
-        throw new Error('Please add Residence ID')
+        res.status(400).json({ "status":"fail", "message":"Please add Residence ID" })
     }
     await residenceModel.findByIdAndUpdate( req.body.residence_ID, {isActive: false, exitAt: Date.now()} )
-    res.status(200).json({"message" : "Residence Removed Successfully"})
+    res.status(200).json({ "status":"success", "message" : "Residence Removed Successfully" })
 })
 
 const changePass = asyncHandler(async (req, res) => {
     if(!req.body.oldPass || !req.body.newPass){
-        res.status(400)
-        throw new Error('Please add Old and New Passwords')
+        res.status(400).json({ "status":"fail", "message":"Please add Old and New Passwords" })
     }
 
     const salt = await bcrypt.genSalt(10)
@@ -125,12 +112,11 @@ const changePass = asyncHandler(async (req, res) => {
     const tenant = await tenantModel.findById( req.user.id, '_id password' )
 
     if(!bcrypt.compareSync(req.body.oldPass, tenant.password)){
-        res.status(400)
-        throw new Error('Old Password Incorrect')
+        res.status(400).json({ "status":"fail", "message":"Old Password Incorrect" })
     }
 
     await tenantModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
-    res.status(200).json({"message" : "Password Changed Successfully"})
+    res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
 })
 
 module.exports = {

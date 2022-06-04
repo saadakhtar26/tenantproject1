@@ -7,19 +7,17 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
 const register = asyncHandler(async (req, res) => {
-    const { email, password, hotel_name, own_cnic, own_father, own_name, phone, address, totalRooms, station_ID } = req.body
+    const { email, password, hotel_name, own_cnic, own_father, own_name, phone, address, totalRooms, station } = req.body
 
     //Checking if all fields exist in request
-    if(!email  || !password  || !hotel_name  || !own_cnic  || !own_father  || !own_name  || !phone  || !address  || !totalRooms  || !station_ID){
-        res.status(400)
-        throw new Error('Please check all fields')
+    if(!email  || !password  || !hotel_name  || !own_cnic  || !own_father  || !own_name  || !phone  || !address  || !totalRooms  || !station){
+        res.status(400).json({ "status":"fail", "message":"Please check all fields" })
     }
 
     //Checking if User already exists
     const userExists = await hotelModel.findOne({email})
     if(userExists){
-        res.status(400)
-        throw new Error('User already Registered')
+        res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
 
     //Creating Account in Database
@@ -35,19 +33,18 @@ const register = asyncHandler(async (req, res) => {
         phone, 
         address, 
         totalRooms, 
-        station_ID
+        station
     })
 
     //Conditional Response
     if(hotel){
         res.status(201).json({
-            _id: hotel.id,
+            "status" : "success",
             token: generateToken(hotel._id)
         })
     }
     else{
-        res.status(400)
-        throw new Error('Invalid User Data')
+        res.status(400).json({ "status":"fail", "message":"Invalid User Data" })
     }
 })
 
@@ -57,13 +54,12 @@ const login = asyncHandler(async (req, res) => {
 
     if(hotel && (await bcrypt.compare(password, hotel.password))){
         res.status(201).json({
-            _id: hotel.id,
+            "status" : "success",
             token: generateToken(hotel._id)
         })
     }
     else{
-        res.status(400)
-        throw new Error('Invalid Credentials')
+        res.status(400).json({ "status":"fail", "message":"Invalid Credentials" })
     }
 })
 
@@ -74,52 +70,51 @@ const generateToken = (id) => {
 }
 
 const dashboard = asyncHandler(async (req, res) => {
-    const hotel = await hotelModel.findById(req.user.id, 'hotel_name email phone isVerified totalRooms address station_ID')
-    const owner = await hotelModel.findById(req.user.id, 'own_name own_cnic own_father')
-    const station = await stationModel.findById(hotel.station_ID, 'station_name sho_name address phone')
-    const guestCount = await roomModel.countDocuments( {isActive: true, hotel_ID: req.user.id} )
-    const result = {"hotel": hotel, "owner" : owner, "station": station, "guest_count" : guestCount}
-    res.status(200).json(result)
+
+    hotelModel.findById(req.user.id, 'hotel_name email phone isVerified totalRooms address')
+    .populate('station', '-_id station_name address')
+    .exec(async function(err, hotel){
+        const owner = await hotelModel.findById(req.user.id, '-_id own_name own_cnic own_father')
+        const guestCount = await roomModel.countDocuments( {isActive: true, hotel_ID: req.user.id} )
+        const result = { "status": "success", "hotel": hotel, "owner" : owner, "guest_count" : guestCount}
+        res.status(200).json(result)
+    })
 })
 
 const guestList = asyncHandler(async (req, res) => {
     const guestList = await roomModel.find( { 'hotel_ID' : req.user.id, 'isActive' : true } )
-    res.status(200).json(guestList)
+    res.status(200).json({ "status":"success", "guests": guestList })
 })
 
 const guestHistory = asyncHandler(async (req, res) => {
     const guestHistory = await roomModel.find( { 'hotel_ID' : req.user.id, 'isActive' : false } )
-    res.status(200).json(guestHistory)
+    res.status(200).json({ "status":"success", "guests":guestHistory })
 })
 
 const addGuest = asyncHandler(async (req, res) => {
     if(!req.body.guest){
-        res.status(400)
-        throw new Error('Guest Data Empty')
+        res.status(400).json({ "status":"fail", "message":"Guest Data Empty" })
     }
     const guest = await roomModel.create(req.body.guest)
     if(guest){
-        res.status(200).json({"guest_ID" : guest.id})
+        res.status(200).json({ "status":"success" })
     }
     else{
-        res.status(400)
-        throw new Error('Invalid Data')
+        res.status(400).json({ "status":"fail", "message":"Invalid Data" })
     }
 })
 
 const delGuest = asyncHandler(async (req, res) => {
     if(!req.body.guest_ID){
-        res.status(400)
-        throw new Error('Please specify Guest ID')
+        res.status(400).json({ "status":"fail", "message":"Please specify Guest ID" })
     }
     await roomModel.findByIdAndUpdate( req.body.guest_ID, {isActive: false, exitAt: Date.now() } )
-    res.status(200).json({"message" : "Guest Successfully Removed"})
+    res.status(200).json({ "status":"success", "message" : "Guest Successfully Removed"})
 })
 
 const changePass = asyncHandler(async (req, res) => {
     if(!req.body.oldPass || !req.body.newPass){
-        res.status(400)
-        throw new Error('Please add Old and New Passwords')
+        res.status(400).json({ "status":"fail", "message" : "Please add Old and New Passwords"})
     }
 
     const salt = await bcrypt.genSalt(10)
@@ -127,12 +122,16 @@ const changePass = asyncHandler(async (req, res) => {
     
     const hotel = await hotelModel.findById( req.user.id, '_id password' )
     if(!bcrypt.compareSync(req.body.oldPass, hotel.password)){
-        res.status(400)
-        throw new Error('Old Password Incorrect')
+        res.status(400).json({ "status":"fail", "message" : "Old Password Incorrect"})
     }
 
     await hotelModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
-    res.status(200).json({"message" : "Password Changed Successfully"})
+    res.status(200).json({ "status":"success", "message" : "Password Changed Successfully" })
+})
+
+const stationsList = asyncHandler(async (req, res) => {
+    const stationsList = await stationModel.find({}, '_id station_name')
+    res.status(200).json({ "status":"success", "stations": stationsList })
 })
 
 module.exports = {
@@ -143,5 +142,6 @@ module.exports = {
     delGuest,
     guestList,
     guestHistory,
-    changePass
+    changePass,
+    stationsList
 }

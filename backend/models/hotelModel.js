@@ -9,7 +9,7 @@ const hotelSchema = mongoose.Schema({
     phone: String,
     address: String,
     totalRooms: Number,
-    station_ID: mongoose.ObjectId,
+    station: [{ type: mongoose.ObjectId, ref: 'station_test' }],
     isVerified: { type: Boolean, default: false }
 })
 
