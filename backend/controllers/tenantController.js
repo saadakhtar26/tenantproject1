@@ -72,20 +72,18 @@ const generateToken = (id) => {
 }
 
 const dashboard = asyncHandler(async (req, res) => {
-
-    residenceModel.find({ 'tenant' : req.user.id, 'isActive' : true })
-    .populate('tenant', '-_id -__v -password')
-    .populate('station', '-_id station_name')
-    .exec(async function(err, list){
-        if(list.length==0){
-            const tenant = await tenantModel.findById(req.user.id,'-_id -__v -password')
-            const stations = await stationModel.find({},'_id station_name')
-            res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
-        }
-        else{
-            res.status(200).json({ "status":"success", "residence":list })
-        }
-    })
+    
+    const tenant = await tenantModel.findById(req.user.id,'-_id -__v -password')
+    .populate('station', '-_id station_name address')
+    
+    const residence = await residenceModel.find({ 'tenant' : req.user.id, 'isActive' : true }, '-_id -__v -tenant')
+    if(residence==null){
+        const stations = await stationModel.find({},'_id station_name')
+        res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
+    }
+    else{
+        res.status(200).json({ "status":"success", "tenant":tenant, "residence":residence })
+    }
 })
 
 const addResidence = asyncHandler(async (req, res) => {
