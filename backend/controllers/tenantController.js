@@ -81,15 +81,22 @@ const addResidence = asyncHandler(async (req, res) => {
     if(!req.body.residence){
         res.status(400).json({ "status":"fail", "message":"Residence Info Empty" })
     }
-    const residence = await residenceModel.create(req.body.residence)
-    if(residence){
-        res.status(200).json({
-            "status" : "success",
-            "residence_ID" : residence.id
-        })
+    const DBresidence = await residenceModel.findOne({ "tenant":req.user.id })
+    if(DBresidence!=null){
+        res.status(400).json({ "status":"fail", "message":"Residence Already Added" })
     }
     else{
-        res.status(400).json({ "status":"fail", "message":"Invalid Residence Data" })
+        req.body.residence.tenant = req.user.id
+        const residence = await residenceModel.create(req.body.residence)
+        if(residence){
+            res.status(200).json({
+                "status" : "success",
+                "residence_ID" : residence.id
+            })
+        }
+        else{
+            res.status(400).json({ "status":"fail", "message":"Invalid Residence Data" })
+        }
     }
 })
 
