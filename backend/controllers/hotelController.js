@@ -107,13 +107,27 @@ const addGuest = asyncHandler(async (req, res) => {
     if(!req.body.guest){
         res.status(400).json({ "status":"fail", "message":"Guest Data Empty" })
     }
-        req.body.guest.hotel_ID = req.user.id
-    const guest = await roomModel.create(req.body.guest)
-    if(guest){
-        res.status(200).json({ "status":"success" })
+    
+    const hotel = await hotelModel.findById(req.user.id, 'totalRooms')
+    const isBooked = await roomModel.countDocuments({"room":req.body.guest.room})
+
+    if( req.body.guest.room > hotel.totalRooms ){
+        res.status(400).json({ "status":"fail", "message":"Maximum Room is: "+hotel.totalRooms })
     }
     else{
-        res.status(400).json({ "status":"fail", "message":"Invalid Data" })
+        if(isBooked){
+            res.status(400).json({ "status":"fail", "message":"Room Already Occupied" })
+        }
+        else{
+            req.body.guest.hotel_ID = req.user.id
+            const guest = await roomModel.create(req.body.guest)
+            if(guest){
+                res.status(200).json({ "status":"success" })
+            }
+            else{
+                res.status(400).json({ "status":"fail", "message":"Invalid Data" })
+            }
+        }
     }
 })
 
