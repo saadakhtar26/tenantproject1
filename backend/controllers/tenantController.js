@@ -102,7 +102,7 @@ const addResidence = asyncHandler(async (req, res) => {
         if(residence){
             res.status(200).json({
                 "status" : "success",
-                "residence_ID" : residence.id
+                "residence" : residence
             })
         }
         else{
