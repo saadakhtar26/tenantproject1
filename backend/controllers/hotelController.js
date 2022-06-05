@@ -11,7 +11,7 @@ const register = asyncHandler(async (req, res) => {
 
     //Checking if all fields exist in request
     if(!email  || !password  || !hotel_name  || !own_cnic  || !own_father  || !own_name  || !phone  || !address  || !totalRooms  || !station){
-        res.status(400).json({ "status":"fail", "message":"Please check all fields" })
+        res.status(400).json({ "status":"fail", "message":"Empty Credentials" })
     }
 
     //Checking if User already exists
@@ -19,47 +19,59 @@ const register = asyncHandler(async (req, res) => {
     if(userExists){
         res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
-
-    //Creating Account in Database
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-    const hotel = await hotelModel.create({
-        password: hashedPassword,
-        email, 
-        hotel_name, 
-        own_cnic, 
-        own_father, 
-        own_name, 
-        phone, 
-        address, 
-        totalRooms, 
-        station
-    })
-
-    //Conditional Response
-    if(hotel){
-        res.status(201).json({
-            "status" : "success",
-            token: generateToken(hotel._id)
-        })
-    }
     else{
-        res.status(400).json({ "status":"fail", "message":"Invalid User Data" })
+        //Creating Account in Database
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        const hotel = await hotelModel.create({
+            password: hashedPassword,
+            email, 
+            hotel_name, 
+            own_cnic, 
+            own_father, 
+            own_name, 
+            phone, 
+            address, 
+            totalRooms, 
+            station
+        })
+    
+        //Conditional Response
+        if(hotel){
+            res.status(201).json({
+                "status" : "success",
+                token: generateToken(hotel._id)
+            })
+        }
+        else{
+            res.status(400).json({ "status":"fail", "message":"Invalid User Data" })
+        }
     }
 })
 
 const login = asyncHandler(async (req, res) => {
     const {email, password} = req.body
-    const hotel = await hotelModel.findOne({email})
 
-    if(hotel && (await bcrypt.compare(password, hotel.password))){
-        res.status(201).json({
-            "status" : "success",
-            token: generateToken(hotel._id)
-        })
+    if(!email || !password){
+        res.status(400).json({ "status":"fail", "message":"Empty Credentials" })
     }
     else{
-        res.status(400).json({ "status":"fail", "message":"Invalid Credentials" })
+        const hotel = await hotelModel.findOne({email})
+    
+        if(!hotel){
+            res.status(400).json({ "status":"fail", "message":"User doesn't Exist" })
+        }
+        else{
+            if(await bcrypt.compare(password, hotel.password)){
+                res.status(201).json({
+                    "status" : "success",
+                    token: generateToken(hotel._id)
+                })
+            }
+            else{
+                res.status(400).json({ "status":"fail", "message":"Invalid Credentials" })
+            }
+        }
     }
 })
 
@@ -95,6 +107,7 @@ const addGuest = asyncHandler(async (req, res) => {
     if(!req.body.guest){
         res.status(400).json({ "status":"fail", "message":"Guest Data Empty" })
     }
+        req.body.guest.hotel_ID = req.user.id
     const guest = await roomModel.create(req.body.guest)
     if(guest){
         res.status(200).json({ "status":"success" })

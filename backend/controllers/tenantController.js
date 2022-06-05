@@ -12,7 +12,7 @@ const register = asyncHandler(async (req, res) => {
 
     //Checking if all fields exist in request
     if(!email || !password || !name || !father || !phone || !cnic){
-        res.status(400).json({ "status":"fail", "message":"Please check all fields" })
+        res.status(400).json({ "status":"fail", "message":"Empty Credentials" })
     }
 
     //Checking if User already exists
@@ -20,37 +20,48 @@ const register = asyncHandler(async (req, res) => {
     if(userExists){
         res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
-
-    //Creating Account in Database
-    const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
-    const tenant = await tenantModel.create({
-        email, 
-        password: hashedPassword, 
-        name, 
-        father, 
-        phone, 
-        cnic
-    })
-
-    //Conditional Response
-    if(tenant){
-        res.status(201).json({ "status":"success", token: generateToken(tenant._id) })
-    }
     else{
-        res.status(400).json({ "status":"fail", "message":"Invalid User Data" })
+        //Creating Account in Database
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        const tenant = await tenantModel.create({
+            email, 
+            password: hashedPassword, 
+            name, 
+            father, 
+            phone, 
+            cnic
+        })
+    
+        //Conditional Response
+        if(tenant){
+            res.status(201).json({ "status":"success", token: generateToken(tenant._id) })
+        }
+        else{
+            res.status(400).json({ "status":"fail", "message":"Invalid User Data" })
+        }
     }
 })
 
 const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body
-    const tenant = await tenantModel.findOne({email},'_id password')
 
-    if(tenant && (await bcrypt.compare(password, tenant.password))){
-        res.status(201).json({ "status":"success", token: generateToken(tenant._id) })
+    if(!email || !password){
+        res.status(400).json({ "status":"fail", "message": "Empty Credentials" })
     }
     else{
-        res.status(400).json({ "status":"fail", "message":"Invalid Credentials" })
+        const tenant = await tenantModel.findOne({email},'_id password')
+        if(!tenant){
+            res.status(400).json({ "status":"fail", "message": "User doesn't Exist" })
+        }
+        else{
+            if((await bcrypt.compare(password, tenant.password))){
+                res.status(201).json({ "status":"success", token: generateToken(tenant._id) })
+            }
+            else{
+                res.status(400).json({ "status":"fail", "message":"Invalid Credentials" })
+            }
+        }
     }
 })
 

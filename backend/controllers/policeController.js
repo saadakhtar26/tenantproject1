@@ -9,17 +9,28 @@ const hotelModel = require('../models/hotelModel')
 const stationModel = require('../models/stationModel')
 
 const login = asyncHandler(async (req, res) => {
-    const {email, password} = req.body
-    const station = await stationModel.findOne({email}, '_id password')
+    const { email, password } = req.body
 
-    if(station && (await bcrypt.compare(password, station.password))){
-        res.status(201).json({
-            "status": "success",
-            token: generateToken(station._id)
-        })
+    if(!email || !password){
+        res.status(400).json({ "status":"success", "message" : "Empty Credentials"})
     }
     else{
-        res.status(400).json({ "status":"success", "message" : "Invalid Credentials"})
+        const station = await stationModel.findOne({email}, '_id password')
+    
+        if(!station){
+            res.status(400).json({ "status":"success", "message" : "Station doesn't Exist"})
+        }
+        else{
+            if(station && (await bcrypt.compare(password, station.password))){
+                res.status(201).json({
+                    "status": "success",
+                    token: generateToken(station._id)
+                })
+            }
+            else{
+                res.status(400).json({ "status":"success", "message" : "Invalid Credentials"})
+            }
+        }
     }
 })
 
@@ -148,9 +159,10 @@ const changePass = asyncHandler(async (req, res) => {
     if(!bcrypt.compareSync(req.body.oldPass, station.password)){
         res.status(400).json({ "status":"fail", "message" : "Old Password Incorrect"})
     }
-
-    await stationModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
-    res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
+    else{
+        await stationModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
+        res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
+    }
 })
 
 module.exports = {
