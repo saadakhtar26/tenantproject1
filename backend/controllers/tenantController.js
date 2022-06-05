@@ -83,7 +83,7 @@ const dashboard = asyncHandler(async (req, res) => {
             res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
         }
         else{
-            res.status(200).json(list)
+            res.status(200).json({ "status":"success", "residence":list })
         }
     })
 })
