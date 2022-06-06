@@ -78,7 +78,7 @@ const dashboard = asyncHandler(async (req, res) => {
     const residence = await residenceModel.find({ 'tenant' : req.user.id, 'isActive' : true }, '-_id -__v -tenant')
     .populate('station', '-_id station_name address')
     
-    if(residence==null){
+    if(residence==null || residence.length==0){
         const stations = await stationModel.find({},'_id station_name')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
     }
