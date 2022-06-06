@@ -93,7 +93,7 @@ const addResidence = asyncHandler(async (req, res) => {
     if(!req.body.residence){
         res.status(400).json({ "status":"fail", "message":"Residence Info Empty" })
     }
-    const DBresidence = await residenceModel.findOne({ "tenant":req.user.id })
+    const DBresidence = await residenceModel.findOne({ "tenant":req.user.id, "isActive":"true" })
     if(DBresidence!=null){
         res.status(400).json({ "status":"fail", "message":"Residence Already Added" })
     }
