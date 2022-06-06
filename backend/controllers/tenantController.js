@@ -74,9 +74,10 @@ const generateToken = (id) => {
 const dashboard = asyncHandler(async (req, res) => {
     
     const tenant = await tenantModel.findById(req.user.id,'-_id -__v -password')
-    .populate('station', '-_id station_name address')
     
     const residence = await residenceModel.find({ 'tenant' : req.user.id, 'isActive' : true }, '-_id -__v -tenant')
+    .populate('station', '-_id station_name address')
+    
     if(residence==null){
         const stations = await stationModel.find({},'_id station_name')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
