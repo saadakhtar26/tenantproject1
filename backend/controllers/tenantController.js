@@ -82,7 +82,7 @@ const dashboard = asyncHandler(async (req, res) => {
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
     } 
     else{
-        const station = await stationModel.findById(residence.station,'-_id station_name')
+        const station = await stationModel.findById(residence[0].station,'-_id station_name')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":residence, "station":station })
     }
 })
