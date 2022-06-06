@@ -93,7 +93,7 @@ const addResidence = asyncHandler(async (req, res) => {
     if(!req.body.residence){
         res.status(400).json({ "status":"fail", "message":"Residence Info Empty" })
     }
-    const DBresidence = await residenceModel.findOne({ "tenant":req.user.id, "isActive":"true" })
+    const DBresidence = await residenceModel.findOne({ "tenant":req.user.id, "isActive":true })
     if(DBresidence!=null){
         res.status(400).json({ "status":"fail", "message":"Residence Already Added" })
     }
@@ -127,15 +127,18 @@ const changePass = asyncHandler(async (req, res) => {
 
     const salt = await bcrypt.genSalt(10)
     const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
+    const hashedNew = await bcrypt.hash(req.body.newPass, salt)
 
     const tenant = await tenantModel.findById( req.user.id, '_id password' )
 
     if(!bcrypt.compareSync(req.body.oldPass, tenant.password)){
         res.status(400).json({ "status":"fail", "message":"Old Password Incorrect" })
     }
+    else{
+        await tenantModel.findByIdAndUpdate( req.user.id, {password: hashedNew} )
+        res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
+    }
 
-    await tenantModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
-    res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
 })
 
 module.exports = {
