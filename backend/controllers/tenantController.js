@@ -75,7 +75,7 @@ const dashboard = asyncHandler(async (req, res) => {
     
     const tenant = await tenantModel.findById(req.user.id,'-_id -__v -password')
     
-    const residence = await residenceModel.findOne({ 'tenant' : req.user.id, 'isActive' : true }, '_id -__v -tenant')
+    const residence = await residenceModel.find({ 'tenant' : req.user.id, 'isActive' : true }, '_id -__v -tenant')
     
     if(residence==null || residence.length==0){
         const stations = await stationModel.find({},'_id station_name')
