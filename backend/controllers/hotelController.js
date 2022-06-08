@@ -145,7 +145,7 @@ const changePass = asyncHandler(async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10)
-    const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
+    const hashedPass = await bcrypt.hash(req.body.newPass, salt)
     
     const hotel = await hotelModel.findById( req.user.id, '_id password' )
     if(!bcrypt.compareSync(req.body.oldPass, hotel.password)){

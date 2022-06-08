@@ -126,7 +126,6 @@ const changePass = asyncHandler(async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10)
-    const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
     const hashedNew = await bcrypt.hash(req.body.newPass, salt)
 
     const tenant = await tenantModel.findById( req.user.id, '_id password' )
