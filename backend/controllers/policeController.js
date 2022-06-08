@@ -153,14 +153,15 @@ const changePass = asyncHandler(async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10)
-    const hashedPass = await bcrypt.hash(req.body.oldPass, salt)
+    const hashedOld = await bcrypt.hash(req.body.oldPass, salt)
+    const hashedNew = await bcrypt.hash(req.body.newPass, salt)
     
     const station = await stationModel.findById( req.user.id, '_id password' )
     if(!bcrypt.compareSync(req.body.oldPass, station.password)){
         res.status(400).json({ "status":"fail", "message" : "Old Password Incorrect"})
     }
     else{
-        await stationModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
+        await stationModel.findByIdAndUpdate( req.user.id, {password: hashedNew} )
         res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
     }
 })

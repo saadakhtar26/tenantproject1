@@ -5,4 +5,4 @@ const salt = bcrypt.genSaltSync(10)
 
 //console.log(hashedPassword)
 
-console.log(bcrypt.compareSync('abc123', '$2a$10$YxK4lCBoaiiefcaAdi/0euD/iVFHuhR77ky1bqc3r9KnkooeFABCe'))
+console.log(bcrypt.compareSync('station123', '$2a$10$u5szrJebbaXMeLRzfP2S6eTP2cOdWuUZZiGCrY9foGT8gBHB2gK.i'))
