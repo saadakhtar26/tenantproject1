@@ -12,13 +12,13 @@ const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body
 
     if(!email || !password){
-        res.status(400).json({ "status":"success", "message" : "Empty Credentials"})
+        res.status(400).json({ "status":"fail", "message" : "Empty Credentials"})
     }
     else{
         const station = await stationModel.findOne({email}, '_id password')
     
         if(!station){
-            res.status(400).json({ "status":"success", "message" : "Station doesn't Exist"})
+            res.status(400).json({ "status":"fail", "message" : "Station doesn't Exist"})
         }
         else{
             if(station && (await bcrypt.compare(password, station.password))){
@@ -28,7 +28,7 @@ const login = asyncHandler(async (req, res) => {
                 })
             }
             else{
-                res.status(400).json({ "status":"success", "message" : "Invalid Credentials"})
+                res.status(400).json({ "status":"fail", "message" : "Invalid Credentials"})
             }
         }
     }
@@ -68,15 +68,15 @@ const dashboard = asyncHandler(async (req, res) => {
 const newTenants = asyncHandler(async (req, res) => {
     //find all residences in that police station area
     residenceModel.find(
-        { 'station' : req.user.id, 'isVerified' : false }, 
+        { 'station' : req.user.id, 'isActive' : true, 'isVerified' : false }, 
         'own_name own_cnic own_father own_phone address entryAt'
     )
     //match those residencies with their associated tenants
     .populate('tenant', '-_id cnic email father name phone')
     //return single response object
     //replaces tenant's ID with its corresponding object
-    .exec(function(err, list){
-        res.status(200).json({ "status":"success", "list":list })
+    .exec(function(err, residenceList){
+        res.status(200).json({ "status":"success", "list":residenceList })
     })
 })
 
@@ -153,7 +153,6 @@ const changePass = asyncHandler(async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10)
-    const hashedOld = await bcrypt.hash(req.body.oldPass, salt)
     const hashedNew = await bcrypt.hash(req.body.newPass, salt)
     
     const station = await stationModel.findById( req.user.id, '_id password' )
