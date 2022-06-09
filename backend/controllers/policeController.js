@@ -86,7 +86,7 @@ const verifyTenant = asyncHandler(async (req, res) => {
     }
     const verifiedTenant = await residenceModel.findByIdAndUpdate( req.body.residence_ID, { isVerified: true } )
     if(verifiedTenant){
-        res.status(200).json({ "status":"success", "tenant" : verifiedTenant.id})
+        res.status(200).json({ "status":"success"})
     }
     else{
         res.status(400).json({ "status":"fail", "message" : "Invalid Data"})
@@ -119,6 +119,19 @@ const newHotels = asyncHandler(async (req, res) => {
     const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : false } )
     
     res.status(200).json({ "status":"success", "hotels":hotelsList })
+})
+
+const verifyHotel = asyncHandler(async (req, res) => {
+    if(!req.body.hotel_ID){
+        res.status(400).json({ "status":"fail", "message" : "Please specify hotel_ID"})
+    }
+    const verifiedHotel = await hotelModel.findByIdAndUpdate( req.body.hotel_ID, { isVerified: true } )
+    if(verifiedHotel){
+        res.status(200).json({ "status":"success"})
+    }
+    else{
+        res.status(400).json({ "status":"fail", "message" : "Invalid Data"})
+    }
 })
 
 const hotelsList = asyncHandler(async (req, res) => {
@@ -161,7 +174,7 @@ const changePass = asyncHandler(async (req, res) => {
     }
     else{
         await stationModel.findByIdAndUpdate( req.user.id, {password: hashedNew} )
-        res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
+        res.status(200).json({ "status":"success"})
     }
 })
 
@@ -170,6 +183,7 @@ module.exports = {
     dashboard,
     newTenants,
     verifyTenant,
+    verifyHotel,
     tenantList,
     tenantHistory,
     newHotels,

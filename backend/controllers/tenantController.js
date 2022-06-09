@@ -117,7 +117,7 @@ const delResidence = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Please add Residence ID" })
     }
     await residenceModel.findByIdAndUpdate( req.body.residence_ID, {isActive: false, exitAt: Date.now()} )
-    res.status(200).json({ "status":"success", "message" : "Residence Removed Successfully" })
+    res.status(200).json({ "status":"success" })
 })
 
 const changePass = asyncHandler(async (req, res) => {
@@ -135,7 +135,7 @@ const changePass = asyncHandler(async (req, res) => {
     }
     else{
         await tenantModel.findByIdAndUpdate( req.user.id, {password: hashedNew} )
-        res.status(200).json({ "status":"success", "message" : "Password Changed Successfully"})
+        res.status(200).json({ "status":"success" })
     }
 
 })

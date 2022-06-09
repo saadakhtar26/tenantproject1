@@ -136,7 +136,7 @@ const delGuest = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Please specify Guest ID" })
     }
     await roomModel.findByIdAndUpdate( req.body.guest_ID, {isActive: false, exitAt: Date.now() } )
-    res.status(200).json({ "status":"success", "message" : "Guest Successfully Removed"})
+    res.status(200).json({ "status":"success" })
 })
 
 const changePass = asyncHandler(async (req, res) => {
@@ -153,7 +153,7 @@ const changePass = asyncHandler(async (req, res) => {
     }
 
     await hotelModel.findByIdAndUpdate( req.user.id, {password: hashedPass} )
-    res.status(200).json({ "status":"success", "message" : "Password Changed Successfully" })
+    res.status(200).json({ "status":"success" })
 })
 
 const stationsList = asyncHandler(async (req, res) => {
