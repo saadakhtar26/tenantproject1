@@ -116,7 +116,7 @@ const tenantHistory = asyncHandler(async (req, res) => {
 })
 
 const newHotels = asyncHandler(async (req, res) => {
-    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : false } )
+    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : false }, '-__v -password' )
     
     res.status(200).json({ "status":"success", "hotels":hotelsList })
 })
@@ -135,9 +135,13 @@ const verifyHotel = asyncHandler(async (req, res) => {
 })
 
 const hotelsList = asyncHandler(async (req, res) => {
-    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : true } )
-    
+    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : true }, '-__v -password' )
     res.status(200).json({ "status":"success", "hotels":hotelsList })
+})
+
+const hotelData = asyncHandler(async (req, res) => {
+    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.body.hotel_ID }, '-__v -password' )
+    res.status(200).json({ "status":"success", "hotel":hotel })
 })
 
 const hotelGuestsList = asyncHandler(async (req, res) => {
@@ -188,6 +192,7 @@ module.exports = {
     tenantHistory,
     newHotels,
     hotelsList,
+    hotelData,
     hotelGuestsList,
     hotelGuestsHistory,
     changePass

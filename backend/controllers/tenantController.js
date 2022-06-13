@@ -16,7 +16,7 @@ const register = asyncHandler(async (req, res) => {
     }
 
     //Checking if User already exists
-    const userExists = await tenantModel.findOne({email})
+    const userExists = await tenantModel.findOne({email}, 'email')
     if(userExists){
         res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
@@ -74,17 +74,14 @@ const generateToken = (id) => {
 const dashboard = asyncHandler(async (req, res) => {
     
     const tenant = await tenantModel.findById(req.user.id,'-_id -__v -password')
-    
     const residence = await residenceModel.find({'tenant' : req.user.id, 'isActive' : true }, '_id -__v -tenant')
     
     if(residence==null || residence.length==0){
-        const stations = await stationModel.find({},'_id station_name')
+        const stations = await stationModel.find({},'_id station_name -__v -password')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
     } 
     else{
-        console.log("residence: ",residence[0])
-        const station = await stationModel.findById(residence[0].station,'-_id station_name')
-        console.log("station: ",station)
+        const station = await stationModel.findById(residence[0].station,'-_id station_name -__v -password')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":residence, "station":station.station_name })
     }
 })

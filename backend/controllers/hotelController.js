@@ -15,7 +15,7 @@ const register = asyncHandler(async (req, res) => {
     }
 
     //Checking if User already exists
-    const userExists = await hotelModel.findOne({email})
+    const userExists = await hotelModel.findOne({email}, 'email')
     if(userExists){
         res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
@@ -33,7 +33,8 @@ const register = asyncHandler(async (req, res) => {
             phone, 
             address, 
             totalRooms, 
-            station
+            totalGuests,
+            station,
         })
     
         //Conditional Response
@@ -56,7 +57,7 @@ const login = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Empty Credentials" })
     }
     else{
-        const hotel = await hotelModel.findOne({email})
+        const hotel = await hotelModel.findOne({email}, 'email')
     
         if(!hotel){
             res.status(400).json({ "status":"fail", "message":"User doesn't Exist" })
@@ -83,10 +84,10 @@ const generateToken = (id) => {
 
 const dashboard = asyncHandler(async (req, res) => {
 
-    hotelModel.findById(req.user.id, 'hotel_name email phone isVerified totalRooms address')
-    .populate('station', '-_id station_name address')
+    hotelModel.findById(req.user.id, 'hotel_name email phone isVerified totalRooms totalGuests address -__v -password')
+    .populate('station', '-_id station_name address -__v -password')
     .exec(async function(err, hotel){
-        const owner = await hotelModel.findById(req.user.id, '-_id own_name own_cnic own_father')
+        const owner = await hotelModel.findById(req.user.id, '-_id own_name own_cnic own_father -__v -password')
         const guestCount = await roomModel.countDocuments( {isActive: true, hotel_ID: req.user.id} )
         const result = { "status": "success", "hotel": hotel, "owner" : owner, "guest_count" : guestCount}
         res.status(200).json(result)
@@ -108,7 +109,7 @@ const addGuest = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Guest Data Empty" })
     }
     
-    const hotel = await hotelModel.findById(req.user.id, 'totalRooms')
+    const hotel = await hotelModel.findById(req.user.id, 'totalRooms -__v -password')
     const isBooked = await roomModel.countDocuments({"room":req.body.guest.room})
 
     if( req.body.guest.room > hotel.totalRooms ){
@@ -121,6 +122,7 @@ const addGuest = asyncHandler(async (req, res) => {
         else{
             req.body.guest.hotel_ID = req.user.id
             const guest = await roomModel.create(req.body.guest)
+            await hotelModel.findByIdAndUpdate( req.user.id, { $inc:{totalGuests:1} } )
             if(guest){
                 res.status(200).json({ "status":"success" })
             }
@@ -136,6 +138,7 @@ const delGuest = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Please specify Guest ID" })
     }
     await roomModel.findByIdAndUpdate( req.body.guest_ID, {isActive: false, exitAt: Date.now() } )
+    await hotelModel.findByIdAndUpdate( req.user.id, { $inc:{totalGuests:-1} } )
     res.status(200).json({ "status":"success" })
 })
 
@@ -147,7 +150,7 @@ const changePass = asyncHandler(async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPass = await bcrypt.hash(req.body.newPass, salt)
     
-    const hotel = await hotelModel.findById( req.user.id, '_id password' )
+    const hotel = await hotelModel.findById( req.user.id, '_id password -__v' )
     if(!bcrypt.compareSync(req.body.oldPass, hotel.password)){
         res.status(400).json({ "status":"fail", "message" : "Old Password Incorrect"})
     }
