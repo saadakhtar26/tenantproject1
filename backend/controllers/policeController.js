@@ -41,7 +41,7 @@ const generateToken = (id) => {
 }
 
 const dashboard = asyncHandler(async (req, res) => {
-    const station = await stationModel.findById(req.user.id, '-_id email station_name sho_cnic sho_name phone address')
+    const station = await stationModel.findById(req.user.id, 'email station_name sho_cnic sho_name phone address')
     const newHotels = await hotelModel.countDocuments( {isVerified: false, station: req.user.id} )
     const hotelList = await hotelModel.countDocuments( {isVerified: true, station: req.user.id} )
     const guestList = await roomModel.countDocuments( {isActive: true} )
@@ -72,7 +72,7 @@ const newTenants = asyncHandler(async (req, res) => {
         'own_name own_cnic own_father own_phone address entryAt'
     )
     //match those residencies with their associated tenants
-    .populate('tenant', '-_id cnic email father name phone')
+    .populate('tenant', 'cnic email father name phone')
     //return single response object
     //replaces tenant's ID with its corresponding object
     .exec(function(err, residenceList){
@@ -98,7 +98,7 @@ const tenantList = asyncHandler(async (req, res) => {
         { 'station' : req.user.id, 'isVerified' : true, 'isActive' : true }, 
         'own_name own_cnic own_father own_phone address entryAt'
     )
-    .populate('tenant', '-_id cnic email father name phone')
+    .populate('tenant', 'cnic email father name phone')
     .exec(function(err, list){
         res.status(200).json({ "status":"success", "list":list })
     })
@@ -109,14 +109,14 @@ const tenantHistory = asyncHandler(async (req, res) => {
         { 'station' : req.user.id, 'isVerified' : true, 'isActive' : false }, 
         'own_name own_cnic own_father own_phone address entryAt exitAt'
     )
-    .populate('tenant', '-_id cnic email father name phone')
+    .populate('tenant', 'cnic email father name phone')
     .exec(function(err, list){
         res.status(200).json({ "status":"success", "list":list })
     })
 })
 
 const newHotels = asyncHandler(async (req, res) => {
-    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : false }, '-password' )
+    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : false }).select('-password' )
     
     res.status(200).json({ "status":"success", "hotels":hotelsList })
 })
@@ -135,12 +135,12 @@ const verifyHotel = asyncHandler(async (req, res) => {
 })
 
 const hotelsList = asyncHandler(async (req, res) => {
-    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : true }, '-password' )
+    const hotelsList = await hotelModel.find( { 'station' : req.user.id, 'isVerified' : true }).select('-password' )
     res.status(200).json({ "status":"success", "hotels":hotelsList })
 })
 
 const hotelData = asyncHandler(async (req, res) => {
-    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.body.hotel_ID }, '-password' )
+    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.body.hotel_ID }).select('-password' )
     res.status(200).json({ "status":"success", "hotel":hotel })
 })
 

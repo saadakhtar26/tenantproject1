@@ -73,15 +73,15 @@ const generateToken = (id) => {
 
 const dashboard = asyncHandler(async (req, res) => {
     
-    const tenant = await tenantModel.findById(req.user.id,'-_id -password')
-    const residence = await residenceModel.find({'tenant' : req.user.id, 'isActive' : true }, '_id -tenant')
+    const tenant = await tenantModel.findById(req.user.id).select('cnic email father name phone') //here
+    const residence = await residenceModel.find({'tenant' : req.user.id, 'isActive' : true }).select('_id -tenant')
     
     if(residence==null || residence.length==0){
-        const stations = await stationModel.find({},'_id station_name -password')
+        const stations = await stationModel.find({}).select('_id station_name') //here
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
     } 
     else{
-        const station = await stationModel.findById(residence[0].station,'-_id station_name -password')
+        const station = await stationModel.findById(residence[0].station).select('station_name') //here
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":residence, "station":station.station_name })
     }
 })

@@ -84,10 +84,10 @@ const generateToken = (id) => {
 
 const dashboard = asyncHandler(async (req, res) => {
 
-    hotelModel.findById(req.user.id, 'hotel_name email phone isVerified totalRooms totalGuests address -password')
-    .populate('station', '-_id station_name address -password')
+    hotelModel.findById(req.user.id).select('hotel_name email phone isVerified totalRooms totalGuests address')
+    .populate('station').select('station_name address')
     .exec(async function(err, hotel){
-        const owner = await hotelModel.findById(req.user.id, '-_id own_name own_cnic own_father -password')
+        const owner = await hotelModel.findById(req.user.id, 'own_name own_cnic own_father -password')
         const guestCount = await roomModel.countDocuments( {isActive: true, hotel_ID: req.user.id} )
         const result = { "status": "success", "hotel": hotel, "owner" : owner, "guest_count" : guestCount}
         res.status(200).json(result)
@@ -109,7 +109,7 @@ const addGuest = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Guest Data Empty" })
     }
     
-    const hotel = await hotelModel.findById(req.user.id, 'totalRooms -password')
+    const hotel = await hotelModel.findById(req.user.id).select('totalRooms')
     const isBooked = await roomModel.countDocuments({"room":req.body.guest.room})
 
     if( req.body.guest.room > hotel.totalRooms ){
@@ -150,7 +150,7 @@ const changePass = asyncHandler(async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPass = await bcrypt.hash(req.body.newPass, salt)
     
-    const hotel = await hotelModel.findById( req.user.id, '_id password -__v' )
+    const hotel = await hotelModel.findById( req.user.id).select('_id password' )
     if(!bcrypt.compareSync(req.body.oldPass, hotel.password)){
         res.status(400).json({ "status":"fail", "message" : "Old Password Incorrect"})
     }
