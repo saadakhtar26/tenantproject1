@@ -57,7 +57,7 @@ const login = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message":"Empty Credentials" })
     }
     else{
-        const hotel = await hotelModel.findOne({email}, 'email')
+        const hotel = await hotelModel.findOne({email}).select('_id email password')
     
         if(!hotel){
             res.status(400).json({ "status":"fail", "message":"User doesn't Exist" })

@@ -2,6 +2,7 @@
 
 Test all modules (Tenant, Hotel & Police) for these :
 
+Hotel List render 'total Rooms', 'total Guests' & 'Vacant Rooms'
 Required Fields
 Format Fields (CNIC, Int. Phone)
 Confirm All Re-directs

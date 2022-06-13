@@ -8,7 +8,7 @@ const hotelSchema = mongoose.Schema({
     own_name: { type: String, required:true },
     phone: { type: String, required:true },
     address: { type: String, required:true },
-    totalRooms: { type: Number,  required:true },
+    totalRooms: { type: Number, required:true },
     station: { type: mongoose.ObjectId, ref: 'station_test', required:true },
     totalGuests: { type: Number, min:0, default:0, required:false },
     isVerified: { type: Boolean, default: false, required:false }

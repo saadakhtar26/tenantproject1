@@ -15,7 +15,7 @@ const login = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message" : "Empty Credentials"})
     }
     else{
-        const station = await stationModel.findOne({email}, '_id password')
+        const station = await stationModel.findOne({email}).select('_id email password')
     
         if(!station){
             res.status(400).json({ "status":"fail", "message" : "Station doesn't Exist"})
@@ -140,7 +140,7 @@ const hotelsList = asyncHandler(async (req, res) => {
 })
 
 const hotelData = asyncHandler(async (req, res) => {
-    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.body.hotel_ID }).select('-password' )
+    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.body.hotel_ID }).select('-password')
     res.status(200).json({ "status":"success", "hotel":hotel })
 })
 

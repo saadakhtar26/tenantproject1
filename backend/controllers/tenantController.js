@@ -50,7 +50,7 @@ const login = asyncHandler(async (req, res) => {
         res.status(400).json({ "status":"fail", "message": "Empty Credentials" })
     }
     else{
-        const tenant = await tenantModel.findOne({email},'_id password')
+        const tenant = await tenantModel.findOne({email}).select('_id email password')
         if(!tenant){
             res.status(400).json({ "status":"fail", "message": "User doesn't Exist" })
         }
