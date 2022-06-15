@@ -6,6 +6,7 @@ const residenceSchema = mongoose.Schema({
     own_cnic: { type: String, required:true },
     own_father: { type: String, required:true },
     own_phone: { type: String, required:true },
+    own_address: { type: String, required:true },
     address: { type: String, required:true },
     station: { type: mongoose.ObjectId, ref: 'station_test', required:true },
     tenant: { type: mongoose.ObjectId, ref: 'tenant_test', required:true },
