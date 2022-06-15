@@ -109,7 +109,7 @@ const addGuest = asyncHandler(async (req, res) => {
     }
     
     const hotel = await hotelModel.findById(req.user.id).select('totalRooms')
-    const isBooked = await roomModel.countDocuments({"room":req.body.guest.room})
+    const isBooked = await roomModel.countDocuments({"room":req.body.guest.room, "isActive":true})
 
     if( req.body.guest.room > hotel.totalRooms ){
         res.status(400).json({ "status":"fail", "message":"Maximum Room is: "+hotel.totalRooms })
