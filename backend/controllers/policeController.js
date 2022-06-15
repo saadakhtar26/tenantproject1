@@ -135,7 +135,7 @@ const hotelsList = asyncHandler(async (req, res) => {
 })
 
 const hotelData = asyncHandler(async (req, res) => {
-    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.body.hotel_ID }).select('-password')
+    const hotel = await hotelModel.findOne( { 'station' : req.user.id, '_id' : req.query.hotel_ID }).select('-password')
     res.status(200).json({ "status":"success", "hotel":hotel })
 })
 
