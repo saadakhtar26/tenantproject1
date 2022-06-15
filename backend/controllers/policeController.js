@@ -41,7 +41,7 @@ const generateToken = (id) => {
 }
 
 const dashboard = asyncHandler(async (req, res) => {
-    const station = await stationModel.findById(req.user.id, 'email station_name sho_cnic sho_name phone address')
+    const station = await stationModel.findById(req.user.id).select('email station_name sho_cnic sho_name phone address')
     const newHotels = await hotelModel.countDocuments( {isVerified: false, station: req.user.id} )
     const hotelList = await hotelModel.countDocuments( {isVerified: true, station: req.user.id} )
     const guestList = await roomModel.countDocuments( {isActive: true} )
@@ -67,10 +67,8 @@ const dashboard = asyncHandler(async (req, res) => {
 
 const newTenants = asyncHandler(async (req, res) => {
     //find all residences in that police station area
-    residenceModel.find(
-        { 'station' : req.user.id, 'isActive' : true, 'isVerified' : false }, 
-        'own_name own_cnic own_father own_phone address entryAt'
-    )
+    residenceModel.find({ 'station' : req.user.id, 'isActive' : true, 'isVerified' : false })
+    .select('own_name own_cnic own_father own_phone address entryAt')
     //match those residencies with their associated tenants
     .populate('tenant', 'cnic email father name phone')
     //return single response object
@@ -94,10 +92,8 @@ const verifyTenant = asyncHandler(async (req, res) => {
 })
 
 const tenantList = asyncHandler(async (req, res) => {
-    residenceModel.find(
-        { 'station' : req.user.id, 'isVerified' : true, 'isActive' : true }, 
-        'own_name own_cnic own_father own_phone address entryAt'
-    )
+    residenceModel.find({ 'station' : req.user.id, 'isVerified' : true, 'isActive' : true })
+    .select('own_name own_cnic own_father own_phone address entryAt')
     .populate('tenant', 'cnic email father name phone')
     .exec(function(err, list){
         res.status(200).json({ "status":"success", "list":list })
@@ -105,9 +101,8 @@ const tenantList = asyncHandler(async (req, res) => {
 })
 
 const tenantHistory = asyncHandler(async (req, res) => {
-    residenceModel.find(
-        { 'station' : req.user.id, 'isVerified' : true, 'isActive' : false }, 
-        'own_name own_cnic own_father own_phone address entryAt exitAt'
+    residenceModel.find({ 'station' : req.user.id, 'isVerified' : true, 'isActive' : false })
+    .select('own_name own_cnic own_father own_phone address entryAt exitAt'
     )
     .populate('tenant', 'cnic email father name phone')
     .exec(function(err, list){
@@ -172,7 +167,7 @@ const changePass = asyncHandler(async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedNew = await bcrypt.hash(req.body.newPass, salt)
     
-    const station = await stationModel.findById( req.user.id, '_id password' )
+    const station = await stationModel.findById( req.user.id).select('_id password')
     if(!bcrypt.compareSync(req.body.oldPass, station.password)){
         res.status(400).json({ "status":"fail", "message" : "Old Password Incorrect"})
     }

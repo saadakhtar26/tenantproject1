@@ -16,7 +16,7 @@ const register = asyncHandler(async (req, res) => {
     }
 
     //Checking if User already exists
-    const userExists = await tenantModel.findOne({email}, 'email')
+    const userExists = await tenantModel.findOne({email}).select('email')
     if(userExists){
         res.status(400).json({ "status":"fail", "message":"User already Registered" })
     }
@@ -77,11 +77,11 @@ const dashboard = asyncHandler(async (req, res) => {
     const residence = await residenceModel.find({'tenant' : req.user.id, 'isActive' : true }).select('_id -tenant')
     
     if(residence==null || residence.length==0){
-        const stations = await stationModel.find({}).select('_id station_name') //here
+        const stations = await stationModel.find({}).select('_id station_name')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":null, "stations":stations })
     } 
     else{
-        const station = await stationModel.findById(residence[0].station).select('station_name') //here
+        const station = await stationModel.findById(residence[0].station).select('station_name')
         res.status(200).json({ "status":"success", "tenant":tenant, "residence":residence, "station":station.station_name })
     }
 })
@@ -125,7 +125,7 @@ const changePass = asyncHandler(async (req, res) => {
     const salt = await bcrypt.genSalt(10)
     const hashedNew = await bcrypt.hash(req.body.newPass, salt)
 
-    const tenant = await tenantModel.findById( req.user.id, '_id password' )
+    const tenant = await tenantModel.findById( req.user.id).select('_id password' )
 
     if(!bcrypt.compareSync(req.body.oldPass, tenant.password)){
         res.status(400).json({ "status":"fail", "message":"Old Password Incorrect" })
