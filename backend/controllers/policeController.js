@@ -140,21 +140,21 @@ const hotelData = asyncHandler(async (req, res) => {
 })
 
 const hotelGuestsList = asyncHandler(async (req, res) => {
-    if(!req.body.hotel_ID){
+    if(!req.query.hotel_ID){
         res.status(400).json({ "status":"fail", "message" : "Please specify Hotel ID"})
     }
     
-    const hotelGuestsList = await roomModel.find( { 'hotel_ID' : req.body.hotel_ID, 'isActive' : true } )
+    const hotelGuestsList = await roomModel.find( { 'hotel_ID' : req.query.hotel_ID, 'isActive' : true } )
     
     res.status(200).json({ "status":"success", "guests":hotelGuestsList })
 })
 
 const hotelGuestsHistory = asyncHandler(async (req, res) => {
-    if(!req.body.hotel_ID){
+    if(!req.query.hotel_ID){
         res.status(400).json({ "status":"fail", "message" : "Please specify Hotel ID"})
     }
     
-    const hotelGuestsHistory = await roomModel.find( { 'hotel_ID' : req.body.hotel_ID, 'isActive' : false } )
+    const hotelGuestsHistory = await roomModel.find( { 'hotel_ID' : req.query.hotel_ID, 'isActive' : false } )
     
     res.status(200).json({ "status":"success", "guests":hotelGuestsHistory })
 })
