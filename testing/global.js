@@ -2,8 +2,6 @@
 
 Test all modules (Tenant, Hotel & Police) for these :
 
-Required Fields
-Format Fields (CNIC, Int. Phone)
 Confirm All Re-directs
 Protect all protected routes
 Check 'status' in response, for conditional rendering

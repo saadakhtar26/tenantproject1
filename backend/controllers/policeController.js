@@ -68,7 +68,7 @@ const dashboard = asyncHandler(async (req, res) => {
 const newTenants = asyncHandler(async (req, res) => {
     //find all residences in that police station area
     residenceModel.find({ 'station' : req.user.id, 'isActive' : true, 'isVerified' : false })
-    .select('own_name own_cnic own_father own_phone address entryAt')
+    .select('own_name own_cnic own_father own_phone own_address address entryAt')
     //match those residencies with their associated tenants
     .populate('tenant', 'cnic email father name phone')
     //return single response object
@@ -93,7 +93,7 @@ const verifyTenant = asyncHandler(async (req, res) => {
 
 const tenantList = asyncHandler(async (req, res) => {
     residenceModel.find({ 'station' : req.user.id, 'isVerified' : true, 'isActive' : true })
-    .select('own_name own_cnic own_father own_phone address entryAt')
+    .select('own_name own_cnic own_father own_phone own_address address entryAt')
     .populate('tenant', 'cnic email father name phone')
     .exec(function(err, list){
         res.status(200).json({ "status":"success", "list":list })
@@ -102,7 +102,7 @@ const tenantList = asyncHandler(async (req, res) => {
 
 const tenantHistory = asyncHandler(async (req, res) => {
     residenceModel.find({ 'station' : req.user.id, 'isVerified' : true, 'isActive' : false })
-    .select('own_name own_cnic own_father own_phone address entryAt exitAt'
+    .select('own_name own_cnic own_father own_phone own_address address entryAt exitAt'
     )
     .populate('tenant', 'cnic email father name phone')
     .exec(function(err, list){

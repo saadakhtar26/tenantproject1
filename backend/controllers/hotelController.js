@@ -87,7 +87,7 @@ const dashboard = asyncHandler(async (req, res) => {
     hotelModel.findById(req.user.id).select('hotel_name email phone isVerified totalRooms totalGuests address')
     .populate('station', 'station_name')
     .exec(async function(err, hotel){
-        const owner = await hotelModel.findById(req.user.id).select('own_name own_cnic own_father own_address')
+        const owner = await hotelModel.findById(req.user.id).select('own_name own_cnic own_father')
         const result = { "status": "success", "hotel": hotel, "owner" : owner }
         res.status(200).json(result)
     })
