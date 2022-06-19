@@ -5,6 +5,8 @@ const hotelModel = require('../models/hotelModel')
 const stationModel = require('../models/stationModel')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+const randomstring = require("randomstring");
+const sendToken = require('../utils/sendToken')
 
 const register = asyncHandler(async (req, res) => {
     const { email, password, hotel_name, own_cnic, own_father, own_name, phone, address, totalRooms, station } = req.body

@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const asyncHandler = require('express-async-handler')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
-var randomstring = require("randomstring");
+const randomstring = require("randomstring");
 
 const sendToken = require('../utils/sendToken')
 const residenceModel = require('../models/residenceModel')

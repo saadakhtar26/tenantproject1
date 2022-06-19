@@ -7,6 +7,8 @@ const tenantModel = require('../models/tenantModel')
 const roomModel = require('../models/roomModel')
 const hotelModel = require('../models/hotelModel')
 const stationModel = require('../models/stationModel')
+const randomstring = require("randomstring");
+const sendToken = require('../utils/sendToken')
 
 const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body
