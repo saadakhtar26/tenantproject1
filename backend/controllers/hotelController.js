@@ -32,8 +32,7 @@ const register = asyncHandler(async (req, res) => {
             own_name, 
             phone, 
             address, 
-            totalRooms, 
-            totalGuests,
+            totalRooms,
             station,
         })
     
