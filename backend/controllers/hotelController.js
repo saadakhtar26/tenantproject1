@@ -162,6 +162,62 @@ const stationsList = asyncHandler(async (req, res) => {
     res.status(200).json({ "status":"success", "stations": stationsList })
 })
 
+const forgetPass = asyncHandler(async (req, res) => {
+    if(!req.body.email){
+        res.status(400).json({ "status":"fail", "message":"Please add Email" })
+    }
+    const hotel = await hotelModel.findOne( { 'email' : req.body.email })
+    if(!hotel){
+        res.status(400).json({ "status":"fail", "message":"Invalid Email" })
+    }
+    else{
+        const newToken = randomstring.generate({
+            length: 6,
+            charset: 'numeric'
+        });
+        const tokenAdded = await hotelModel.findOneAndUpdate(
+            { email: req.body.email }, 
+            { token: newToken }
+        )
+        if(tokenAdded){
+            await sendToken(req.body.email, 'Forgot Password', 
+            'Use this OTP for password reset: '+newToken)
+            res.status(200).json({ "status":"success", "message":"OTP send to "+req.body.email })
+        }
+        else{
+            res.status(200).json({ "status":"fail", "message":"OTP not sent, contact iT support" })
+        }
+    }
+})
+
+const validateToken = asyncHandler(async (req, res) => {
+    if(!req.body.email){
+        res.status(400).json({ "status":"fail", "message":"Please add Email" })
+    }
+    if(!req.body.password){
+        res.status(400).json({ "status":"fail", "message":"Please add Password" })
+    }
+    if(!req.body.token){
+        res.status(400).json({ "status":"fail", "message":"Please add Token" })
+    }
+    const hotel = await hotelModel.findOne( { 'email' : req.body.email })
+    if(!hotel){
+        res.status(400).json({ "status":"fail", "message":"Invalid Email" })
+    }
+    else{
+        if(hotel.token==req.body.token){
+            const salt = await bcrypt.genSalt(10)
+            const hashedNew = await bcrypt.hash(req.body.password, salt)
+            await hotelModel.findOneAndUpdate( {email:req.body.email}, {password: hashedNew} )
+
+            res.status(200).json({ "status":"success", "message":"Password Changed Succesfully" })
+        }
+        else{
+            res.status(400).json({ "status":"fail", "message":"Invalid OTP" })
+        }
+    }
+})
+
 module.exports = {
     register,
     login,
@@ -171,5 +227,7 @@ module.exports = {
     guestList,
     guestHistory,
     changePass,
-    stationsList
+    stationsList,
+    forgetPass,
+    validateToken,
 }

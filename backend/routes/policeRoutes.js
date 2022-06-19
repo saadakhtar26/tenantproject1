@@ -1,11 +1,13 @@
 const express = require('express')
 const router = express.Router()
 const {
-    login, dashboard, newTenants, verifyTenant, verifyHotel, tenantList, tenantHistory, newHotels, hotelsList, hotelData, hotelGuestsList, hotelGuestsHistory, changePass
+    login, dashboard, newTenants, verifyTenant, verifyHotel, tenantList, tenantHistory, newHotels, hotelsList, hotelData, hotelGuestsList, hotelGuestsHistory, changePass, forgetPass, validateToken
 } = require('../controllers/policeController')
 const {protect} = require('../middleware/authMiddleware')
 
 router.route('/login').post(login)
+router.route('/forgetpass').post(forgetPass)
+router.route('/validate').post(validateToken)
 router.get('/dashboard', protect, dashboard)
 router.get('/tenants', protect, tenantList)
 router.get('/tenants/new', protect, newTenants)

@@ -6,7 +6,8 @@ const stationSchema = mongoose.Schema({
     sho_cnic: String,
     sho_name: String,
     phone: String,
-    address: String
+    address: String,
+    token: { type: String, required: false }
 })
 
 module.exports = mongoose.model('station_test', stationSchema)
