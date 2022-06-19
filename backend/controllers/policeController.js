@@ -70,7 +70,7 @@ const newTenants = asyncHandler(async (req, res) => {
     residenceModel.find({ 'station' : req.user.id, 'isActive' : true, 'isVerified' : false })
     .select('own_name own_cnic own_father own_phone own_address address entryAt')
     //match those residencies with their associated tenants
-    .populate('tenant', 'cnic email father name phone')
+    .populate('tenant').select('cnic email father name phone')
     //return single response object
     //replaces tenant's ID with its corresponding object
     .exec(function(err, residenceList){
